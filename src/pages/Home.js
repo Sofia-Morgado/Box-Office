@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import MainPageLayout from '../components/MainPageLayout';
+import {apiGet} from '../misc/config';
 
 // eslint-disable-next-line arrow-body-style
 const Home = () => {
   const [input, setInput] = useState('');
+  const [results, setResults] = useState(null);
 
   // Change value as the user is writing
   const onInputChange = ev => {
@@ -11,9 +13,10 @@ const Home = () => {
   };
 
   const onSearch = () => {
-    fetch(`https://api.tvmaze.com/search/shows?q=${input}`)
-      .then(r => r.json())
-      .then(result => {});
+    apiGet(`/search/shows?q=${input}`).then(result => {
+      setResults(result);
+    });
+    
   };
 
   const onKeyDown = ev => {
@@ -21,6 +24,26 @@ const Home = () => {
     if (ev.keyCode === 13) {
       onSearch();
     }
+  };
+
+  const renderResults = () => {
+    // API didn't return anything
+    if (results && results.length === 0) {
+      return <div>No results</div>;
+    }
+
+    // API returns
+    if (results && results.length > 0) {
+      return (
+        <div>
+          {results.map(item => (
+            <div key={item.show.id}>{item.show.name}</div>
+          ))}
+        </div>
+      );
+    };
+
+    return null;
   };
 
   return (
@@ -34,6 +57,7 @@ const Home = () => {
       <button type="button" onClick={onSearch}>
         Search
       </button>
+      {renderResults()}
     </MainPageLayout>
   );
 };
